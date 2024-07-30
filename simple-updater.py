@@ -21,11 +21,29 @@ def update_property_value(url, value):
     except requests.RequestException as e:
         print(f"Failed to update value: {e}")
 
+def read_value(url):
+    """Send a GET request to read the property value at the given URL."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        print(f"Got the value {response.text}. Server response: {response.status_code}")
+        return float(response.text.strip('"'))
+    except requests.RequestException as e:
+        print(f"Failed to get value: {e}")
+
+def compute_bpm(biegung, dauer):
+    return biegung / dauer
+
 def main():
-    url = "http://localhost:8081/submodels/aHR0cHM6Ly9odHctYmVybGluLmRlL2lkcy9zbS9kZW1vc3VibW9kZWx2Mw/submodel-elements/IntProp/$value"
+    url_bpm = "http://localhost:8081/submodels/aHR0cHM6Ly9leGFtcGxlLmNvbS9pZHMvc20vNjA1Ml85MDAzXzcwNDJfMzY4Mw/submodel-elements/BPM/$value"
+    url_biegung = "http://localhost:8081/submodels/aHR0cHM6Ly9leGFtcGxlLmNvbS9pZHMvc20vMTQ4MV85MDAzXzcwNDJfNzUxMA/submodel-elements/B/$value"
+    url_dauer = "http://localhost:8081/submodels/aHR0cHM6Ly9leGFtcGxlLmNvbS9pZHMvc20vMTQ4MV85MDAzXzcwNDJfNzUxMA/submodel-elements/D/$value"
+
     while True:
-        new_value = generate_random_int()
-        update_property_value(url, new_value)
+        biegung = read_value(url_biegung)
+        dauer = read_value(url_dauer)
+        bpm = compute_bpm(biegung, dauer)
+        update_property_value(url_bpm, bpm)
         time.sleep(5)
 
 if __name__ == "__main__":
